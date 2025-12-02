@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#050110" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Astro Ved AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              serif: ['Cinzel', 'serif'],
+              sans: ['Quicksand', 'sans-serif'],
+            },
+            colors: {
+              cosmic: {
+                black: '#050110', // Darker base
+                950: '#0D0221',
+                900: '#150531',
+                800: '#230b4d',
+                700: '#3a1c71',
+              },
+              gold: {
+                100: '#fffbd6',
+                200: '#fff3ad',
+                300: '#ffe570',
+                400: '#f8d447',
+                500: '#eeb815',
+                600: '#d1930a',
+                glow: 'rgba(248, 212, 71, 0.6)',
+              },
+              neon: {
+                purple: '#b026ff',
+                blue: '#4c6ef5',
+                pink: '#ff00cc'
+              }
+            },
+            animation: {
+              'spin-slow': 'spin 20s linear infinite',
+              'spin-slower': 'spin 40s linear infinite',
+              'spin-reverse-slow': 'spin-reverse 25s linear infinite',
+              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'float': 'float 6s ease-in-out infinite',
+              'float-delayed': 'float 8s ease-in-out infinite 2s',
+              'shine': 'shine 3s infinite',
+              'twinkle': 'twinkle 4s ease-in-out infinite',
+              'nebula-move': 'nebula 60s linear infinite',
+            },
+            keyframes: {
+              'spin-reverse': {
+                'from': { transform: 'rotate(360deg)' },
+                'to': { transform: 'rotate(0deg)' },
+              },
+              'float': {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-15px)' },
+              },
+              'shine': {
+                '0%': { opacity: 0.5, transform: 'scale(1)' },
+                '50%': { opacity: 1, transform: 'scale(1.1)' },
+                '100%': { opacity: 0.5, transform: 'scale(1)' },
+              },
+              'twinkle': {
+                '0%, 100%': { opacity: 0.3, transform: 'scale(0.8)' },
+                '50%': { opacity: 1, transform: 'scale(1.2)' },
+              },
+              'nebula': {
+                '0%': { backgroundPosition: '0% 0%' },
+                '100%': { backgroundPosition: '100% 100%' },
+              }
+            },
+            backgroundImage: {
+              'cosmic-gradient': 'radial-gradient(circle at top, #1a0b3c 0%, #0D0221 40%, #000000 100%)',
+              'gold-gradient': 'linear-gradient(to right, #fff9c4, #f8d447, #d1930a)',
+              'glass-shine': 'linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%)',
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      html, body {
+        background-color: #050110;
+        color: white;
+        overflow-x: hidden;
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+      
+      /* Advanced Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0D0221;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #3a1c71;
+        border-radius: 3px;
+      }
+      
+      .glass-card-premium {
+        background: rgba(13, 2, 33, 0.4);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+      }
+      
+      .glass-card-glow:hover {
+        border-color: rgba(248, 212, 71, 0.4);
+        box-shadow: 0 0 20px rgba(248, 212, 71, 0.15), inset 0 0 20px rgba(248, 212, 71, 0.05);
+      }
+
+      .text-gold-gradient {
+        background: linear-gradient(to right, #fff9c4, #f8d447, #d1930a);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      /* Parallax Stars Layers */
+      .stars-layer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 200%;
+        height: 200%;
+        background-repeat: repeat;
+        z-index: 0;
+        pointer-events: none;
+      }
+      
+      .stars-1 {
+        background-image: radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+                          radial-gradient(1.5px 1.5px at 150px 70px, #ffffff, rgba(0,0,0,0)),
+                          radial-gradient(1px 1px at 300px 200px, #ffffff, rgba(0,0,0,0));
+        background-size: 400px 400px;
+        opacity: 0.6;
+        animation: nebula-move 120s linear infinite;
+      }
+      
+      .stars-2 {
+        background-image: radial-gradient(2px 2px at 80px 100px, #f8d447, rgba(0,0,0,0)),
+                          radial-gradient(2px 2px at 200px 300px, #b026ff, rgba(0,0,0,0));
+        background-size: 550px 550px;
+        opacity: 0.4;
+        animation: nebula-move 180s linear infinite reverse;
+      }
+
+      /* Nebula Cloud */
+      .nebula-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: 
+          radial-gradient(circle at 20% 30%, rgba(76, 110, 245, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 80% 70%, rgba(176, 38, 255, 0.08) 0%, transparent 50%);
+        filter: blur(60px);
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+  <script type="module" src="/index.tsx"></script>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "framer-motion": "https://aistudiocdn.com/framer-motion@^11.0.8",
+    "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.86.0",
+    "vite": "https://aistudiocdn.com/vite@^7.2.6",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
