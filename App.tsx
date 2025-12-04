@@ -10,6 +10,44 @@ import { AppView, Language, ChatMessage, HoroscopeTimeframe } from './types';
 import * as Gemini from './services/geminiService';
 import { supabase } from './services/supabaseClient';
 
+// --- SEO Management ---
+
+const updateSeo = (view: AppView, language: Language, dynamicData?: string) => {
+  let title = "Astro Ved AI - Vedic Astrology";
+  let description = "Your personal AI astrologer for Horoscopes, Kundli, and Compatibility.";
+
+  const t = TRANSLATIONS[language];
+
+  switch (view) {
+    case AppView.HOME:
+      title = `Astro Ved AI - ${t.home}`;
+      break;
+    case AppView.HOROSCOPE:
+      title = `${dynamicData || 'Horoscope'} - ${t.horoscope} | Astro Ved AI`;
+      description = `Read your daily horoscope for ${dynamicData}. Accurate vedic predictions.`;
+      break;
+    case AppView.KUNDLI:
+      title = `${t.kundli} - Vedic Birth Chart | Astro Ved AI`;
+      description = "Generate your detailed Vedic Kundli birth chart instantly with AI.";
+      break;
+    case AppView.COMPATIBILITY:
+      title = `${t.compatibility} - Love Match | Astro Ved AI`;
+      description = "Check your relationship compatibility score using Vedic Astrology.";
+      break;
+    case AppView.CHAT:
+      title = `${t.chat} - Ask AI Astrologer`;
+      break;
+    default:
+      break;
+  }
+
+  document.title = title;
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) {
+    metaDesc.setAttribute('content', description);
+  }
+};
+
 // --- Animation Variants ---
 
 const fadeIn: Variants = {
@@ -145,15 +183,42 @@ const AnimatedLogo = ({ size = "large" }: { size?: "small" | "large" }) => {
   );
 };
 
-// --- Ad Banner Component ---
-const AdBanner = ({ className = "" }: { className?: string }) => {
+// --- Ad Banner Component (AdSense Ready) ---
+interface AdBannerProps {
+  className?: string;
+  adSlot?: string; // Optional: For passing specific Ad Unit ID
+}
+
+const AdBanner = ({ className = "", adSlot }: AdBannerProps) => {
   return (
-    <div className={`w-full h-[60px] mx-auto bg-black/20 backdrop-blur-md border border-white/5 flex flex-col items-center justify-center relative overflow-hidden rounded-lg my-4 group ${className}`}>
-      <div className="absolute inset-0 bg-gold-400/5 group-hover:bg-gold-400/10 transition-colors" />
+    <div className={`w-full min-h-[60px] mx-auto bg-black/20 backdrop-blur-md border border-white/5 flex flex-col items-center justify-center relative overflow-hidden rounded-lg my-4 group ${className}`}>
+      {/* 
+        NOTE FOR DEPLOYMENT: 
+        To use Real Google AdSense:
+        1. Uncomment the code below.
+        2. Replace 'ca-pub-XXXXXXXXXXXXXXXX' with your Publisher ID.
+        3. Replace '1234567890' with the adSlot ID passed via props.
+      */}
+      
+      {/* 
+      <ins className="adsbygoogle"
+           style={{ display: 'block' }}
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot={adSlot || "1234567890"}
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>
+           (adsbygoogle = window.adsbygoogle || []).push({});
+      </script> 
+      */}
+
+      {/* Placeholder Display until Ads are active */}
+      <div className="absolute inset-0 bg-gold-400/5 group-hover:bg-gold-400/10 transition-colors pointer-events-none" />
       <span className="text-[9px] text-gray-600 uppercase tracking-widest relative z-10 font-bold border px-1 rounded border-gray-700">Ad</span>
       <span className="text-[10px] text-gray-500 relative z-10 mt-1">Advertisement Space</span>
+      
       {/* Simulate Ad Loading shimmer */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shine" />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shine pointer-events-none" />
     </div>
   );
 };
@@ -1260,6 +1325,13 @@ const App = () => {
   });
   const [selectedSign, setSelectedSign] = useState<string>('');
   const t = TRANSLATIONS[prefs.language];
+
+  // Dynamic SEO Update based on view and data
+  useEffect(() => {
+    let dynamicData = undefined;
+    if (view === AppView.HOROSCOPE) dynamicData = selectedSign || prefs.sign;
+    updateSeo(view, prefs.language, dynamicData);
+  }, [view, prefs.language, selectedSign, prefs.sign]);
 
   const fetchProfile = async (userId: string) => {
     try {
