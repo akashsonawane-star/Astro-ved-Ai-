@@ -37,6 +37,9 @@ const updateSeo = (view: AppView, language: Language, dynamicData?: string) => {
     case AppView.CHAT:
       title = `${t.chat} - Ask AI Astrologer`;
       break;
+    case AppView.FIND_RASHI:
+      title = `${t.findRashi} - Calculator | Astro Ved AI`;
+      break;
     default:
       break;
   }
@@ -74,6 +77,46 @@ const pageTransition: Variants = {
   initial: { opacity: 0, scale: 0.95, y: 10 },
   animate: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
   exit: { opacity: 0, scale: 1.05, filter: "blur(4px)", transition: { duration: 0.3 } }
+};
+
+// --- Helper Functions ---
+
+const getColorHex = (colorName: string): string => {
+    if (!colorName) return '#F8D447';
+    const c = colorName.toLowerCase();
+    if (c.includes('gold') || c.includes('yellow')) return '#F8D447';
+    if (c.includes('red') || c.includes('crimson') || c.includes('maroon') || c.includes('vermilion')) return '#EF4444';
+    if (c.includes('blue') || c.includes('azure') || c.includes('navy') || c.includes('teal')) return '#3B82F6';
+    if (c.includes('green') || c.includes('emerald') || c.includes('olive')) return '#10B981';
+    if (c.includes('purple') || c.includes('violet') || c.includes('indigo') || c.includes('lavender')) return '#A855F7';
+    if (c.includes('orange') || c.includes('amber')) return '#F97316';
+    if (c.includes('pink') || c.includes('magenta')) return '#EC4899';
+    if (c.includes('white') || c.includes('cream') || c.includes('pearl')) return '#FFFFFF';
+    if (c.includes('black') || c.includes('charcoal')) return '#1a1a1a';
+    if (c.includes('silver') || c.includes('grey') || c.includes('gray')) return '#C0C0C0';
+    if (c.includes('brown') || c.includes('beige')) return '#A52A2A';
+    return colorName; 
+};
+
+const detectRashiFromDate = (dateStr: string) => {
+    if(!dateStr) return null;
+    const date = new Date(dateStr);
+    if(isNaN(date.getTime())) return null; 
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return 'Aries';
+    if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return 'Taurus';
+    if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return 'Gemini';
+    if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return 'Cancer';
+    if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return 'Leo';
+    if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return 'Virgo';
+    if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) return 'Libra';
+    if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) return 'Scorpio';
+    if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return 'Sagittarius';
+    if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) return 'Capricorn';
+    if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return 'Aquarius';
+    if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) return 'Pisces';
+    return 'Aries';
 };
 
 // --- Premium UI Components ---
@@ -192,27 +235,6 @@ interface AdBannerProps {
 const AdBanner = ({ className = "", adSlot }: AdBannerProps) => {
   return (
     <div className={`w-full min-h-[60px] mx-auto bg-black/20 backdrop-blur-md border border-white/5 flex flex-col items-center justify-center relative overflow-hidden rounded-lg my-4 group ${className}`}>
-      {/* 
-        NOTE FOR DEPLOYMENT: 
-        To use Real Google AdSense:
-        1. Uncomment the code below.
-        2. Replace 'ca-pub-XXXXXXXXXXXXXXXX' with your Publisher ID.
-        3. Replace '1234567890' with the adSlot ID passed via props.
-      */}
-      
-      {/* 
-      <ins className="adsbygoogle"
-           style={{ display: 'block' }}
-           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-           data-ad-slot={adSlot || "1234567890"}
-           data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
-      <script>
-           (adsbygoogle = window.adsbygoogle || []).push({});
-      </script> 
-      */}
-
-      {/* Placeholder Display until Ads are active */}
       <div className="absolute inset-0 bg-gold-400/5 group-hover:bg-gold-400/10 transition-colors pointer-events-none" />
       <span className="text-[9px] text-gray-600 uppercase tracking-widest relative z-10 font-bold border px-1 rounded border-gray-700">Ad</span>
       <span className="text-[10px] text-gray-500 relative z-10 mt-1">Advertisement Space</span>
@@ -341,25 +363,6 @@ const NavButton = ({ active, icon: Icon, label, onClick }: any) => (
   </button>
 );
 
-// --- Helper Functions ---
-
-const getColorHex = (colorName: string): string => {
-    if (!colorName) return '#F8D447';
-    const c = colorName.toLowerCase();
-    if (c.includes('gold') || c.includes('yellow')) return '#F8D447';
-    if (c.includes('red') || c.includes('crimson') || c.includes('maroon') || c.includes('vermilion')) return '#EF4444';
-    if (c.includes('blue') || c.includes('azure') || c.includes('navy') || c.includes('teal')) return '#3B82F6';
-    if (c.includes('green') || c.includes('emerald') || c.includes('olive')) return '#10B981';
-    if (c.includes('purple') || c.includes('violet') || c.includes('indigo') || c.includes('lavender')) return '#A855F7';
-    if (c.includes('orange') || c.includes('amber')) return '#F97316';
-    if (c.includes('pink') || c.includes('magenta')) return '#EC4899';
-    if (c.includes('white') || c.includes('cream') || c.includes('pearl')) return '#FFFFFF';
-    if (c.includes('black') || c.includes('charcoal')) return '#1a1a1a';
-    if (c.includes('silver') || c.includes('grey') || c.includes('gray')) return '#C0C0C0';
-    if (c.includes('brown') || c.includes('beige')) return '#A52A2A';
-    // Fallback attempts
-    return colorName; 
-};
 
 // --- Auth View ---
 
@@ -383,7 +386,6 @@ const AuthView: React.FC<{ language: Language, onLogin: (user: any) => void }> =
         });
 
         if (error) throw error;
-        // onLogin is handled by the auth state listener in App
       } else {
         const { data, error } = await supabase.auth.signUp({
           email: formData.email,
@@ -757,9 +759,6 @@ const HomeView: React.FC<{
   );
 };
 
-// ... [HoroscopeDetailView, CompatibilityInputCard, CompatibilityView, KundliView, ChatView remain similar but imports updated] ...
-
-// Re-implementing specific views to ensure full context
 const HoroscopeDetailView: React.FC<{ 
     signName: string, 
     language: Language, 
@@ -919,29 +918,8 @@ const CompatibilityView: React.FC<{ language: Language, setView: (v: AppView) =>
     const [result, setResult] = useState<any>(null);
     const [loading, setLoading] = useState(false);
 
-    const detectRashi = (dateStr: string) => {
-        if(!dateStr) return null;
-        const date = new Date(dateStr);
-        if(isNaN(date.getTime())) return null; 
-        const day = date.getDate();
-        const month = date.getMonth() + 1;
-        if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return 'Aries';
-        if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return 'Taurus';
-        if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return 'Gemini';
-        if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return 'Cancer';
-        if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return 'Leo';
-        if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return 'Virgo';
-        if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) return 'Libra';
-        if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) return 'Scorpio';
-        if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return 'Sagittarius';
-        if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) return 'Capricorn';
-        if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return 'Aquarius';
-        if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) return 'Pisces';
-        return 'Aries';
-    };
-
     const handleDateChange = (setter: any, prev: any, val: string) => {
-        const rashi = detectRashi(val);
+        const rashi = detectRashiFromDate(val);
         setter({ ...prev, dob: val, rashi: rashi || prev.rashi });
     }
 
@@ -997,6 +975,72 @@ const CompatibilityView: React.FC<{ language: Language, setView: (v: AppView) =>
         </motion.div>
     );
 };
+
+// ... FindRashi ...
+const FindRashiView: React.FC<{ language: Language, setView: (v: AppView) => void, onSignSelect: (sign: string) => void }> = ({ language, setView, onSignSelect }) => {
+    const t = TRANSLATIONS[language];
+    const [dob, setDob] = useState('');
+    const [name, setName] = useState('');
+    const [result, setResult] = useState<string | null>(null);
+
+    const calculate = (e: React.FormEvent) => {
+        e.preventDefault();
+        if(!dob) return;
+        const foundSign = detectRashiFromDate(dob);
+        setResult(foundSign);
+    };
+
+    return (
+        <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit" className="pt-4 px-4 pb-28 h-screen overflow-y-auto">
+             <header className="flex items-center mb-6">
+                <button onClick={() => setView(AppView.HOME)} className="p-2 bg-white/5 rounded-full hover:bg-white/10 mr-4"><ArrowLeft className="w-5 h-5" /></button>
+                <h2 className="text-xl font-serif font-bold text-gold-gradient">{t.findRashi}</h2>
+            </header>
+            
+            {!result ? (
+                <form onSubmit={calculate} className="space-y-6">
+                    <div className="flex justify-center mb-6">
+                         <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center border border-gold-400/30">
+                            <Search size={40} className="text-gold-400" />
+                         </div>
+                    </div>
+                    <GlassCard className="space-y-4">
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-gray-500 uppercase ml-1">{t.name}</label>
+                            <input type="text" placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-gold-400/50" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-gray-500 uppercase ml-1">{t.dob}</label>
+                            <input type="date" required value={dob} onChange={e => setDob(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-gold-400/50" />
+                        </div>
+                    </GlassCard>
+                    <motion.button whileTap={{ scale: 0.95 }} type="submit" className="w-full py-4 bg-gradient-to-r from-gold-500 to-orange-500 rounded-xl font-bold text-black shadow-lg">Calculate My Sign</motion.button>
+                </form>
+            ) : (
+                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center space-y-8 py-8">
+                    <h3 className="text-lg text-gray-300">Hello {name || 'Seeker'}, your sign is:</h3>
+                    
+                    <div className="relative">
+                         <div className="absolute inset-0 bg-gold-400/20 blur-2xl rounded-full"></div>
+                         <div className="relative w-40 h-40 rounded-full border-4 border-gold-400/50 bg-black/40 flex flex-col items-center justify-center backdrop-blur-md">
+                            <span className="text-6xl mb-2">{ZODIAC_SIGNS.find(z => z.name === result)?.symbol}</span>
+                         </div>
+                    </div>
+                    
+                    <div className="text-center">
+                        <h2 className="text-3xl font-serif font-bold text-gold-400">{t.zodiac[result.toLowerCase() as keyof typeof t.zodiac]}</h2>
+                        <p className="text-sm text-gray-400 mt-2">{ZODIAC_SIGNS.find(z => z.name === result)?.dates}</p>
+                    </div>
+
+                    <div className="w-full space-y-3">
+                        <button onClick={() => onSignSelect(result)} className="w-full py-4 bg-gold-400 rounded-xl text-black font-bold shadow-lg shadow-gold-400/20">View Horoscope</button>
+                        <button onClick={() => setResult(null)} className="w-full py-3 bg-white/5 rounded-xl text-white font-bold">Check Another Date</button>
+                    </div>
+                </motion.div>
+            )}
+        </motion.div>
+    );
+}
 
 // ... Kundli ...
 const KundliView: React.FC<{ language: Language, setView: (v: AppView) => void }> = ({ language, setView }) => {
@@ -1140,28 +1184,10 @@ const ProfileView: React.FC<{
        
        // Sync Zodiac Sign logic
        if (formData.dob) {
-           const date = new Date(formData.dob);
-           if (!isNaN(date.getTime())) {
-                const day = date.getDate();
-                const month = date.getMonth() + 1;
-                let sign = 'Aries';
-                if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) sign = 'Aries';
-                else if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) sign = 'Taurus';
-                else if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) sign = 'Gemini';
-                else if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) sign = 'Cancer';
-                else if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) sign = 'Leo';
-                else if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) sign = 'Virgo';
-                else if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) sign = 'Libra';
-                else if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) sign = 'Scorpio';
-                else if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) sign = 'Sagittarius';
-                else if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) sign = 'Capricorn';
-                else if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) sign = 'Aquarius';
-                else if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) sign = 'Pisces';
-                
-                if (sign !== prefs.sign) {
-                    setPrefs((prev: any) => ({ ...prev, sign, userProfile: formData }));
-                     await supabase.from('profiles').upsert({ id: user.id, rashi: sign });
-                }
+           const sign = detectRashiFromDate(formData.dob);
+           if (sign && sign !== prefs.sign) {
+                setPrefs((prev: any) => ({ ...prev, sign, userProfile: formData }));
+                await supabase.from('profiles').upsert({ id: user.id, rashi: sign });
            }
        }
     };
@@ -1414,7 +1440,7 @@ const App = () => {
           case AppView.PROFILE: return <ProfileView prefs={prefs} setPrefs={setPrefs} language={prefs.language} setView={setView} />;
           case AppView.SETTINGS: return <SettingsView prefs={prefs} setPrefs={setPrefs} language={prefs.language} setView={setView} />;
           case AppView.PRIVACY: return <PrivacyView onBack={() => setView(AppView.SETTINGS)} />;
-          case AppView.FIND_RASHI: return <ProfileView prefs={prefs} setPrefs={setPrefs} language={prefs.language} setView={setView} />;
+          case AppView.FIND_RASHI: return <FindRashiView language={prefs.language} setView={setView} onSignSelect={(s) => { setSelectedSign(s); setView(AppView.HOROSCOPE); }} />;
           case AppView.NUMEROLOGY: return <NumerologyView language={prefs.language} onBack={() => setView(AppView.HOME)} />;
           default: return <WelcomeView onComplete={handleLanguageSelect} />;
       }

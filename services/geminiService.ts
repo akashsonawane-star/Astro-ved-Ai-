@@ -9,12 +9,23 @@ const getAi = () => {
 
 // --- Mock Data Generators for Fallback ---
 
-const getMockHoroscope = (sign: string) => ({
-  prediction: `The cosmic alignment for ${sign} suggests a day of reflection and growth. While the stars are currently reorganizing their energy, focus on your inner strength. Good things are coming your way.`,
-  luckyNumber: "7",
-  luckyColor: "Gold",
-  mood: "Optimistic"
-});
+const getMockHoroscope = (sign: string) => {
+  const colors = ["Gold", "Crimson", "Royal Blue", "Emerald", "Violet", "Silver", "Orange", "White", "Teal", "Lavender"];
+  const moods = ["Optimistic", "Reflective", "Energetic", "Calm", "Ambitious", "Creative", "Cautious", "Joyful"];
+  
+  // Simple deterministic random based on date + sign length to vary it daily/per sign
+  const seed = new Date().getDate() + sign.length;
+  const randomColor = colors[seed % colors.length];
+  const randomMood = moods[seed % moods.length];
+  const randomNum = (seed % 9) + 1;
+
+  return {
+    prediction: `The cosmic alignment for ${sign} suggests a day of reflection and growth. While the stars are currently reorganizing their energy, focus on your inner strength. Good things are coming your way. (Offline Mode)`,
+    luckyNumber: randomNum.toString(),
+    luckyColor: randomColor,
+    mood: randomMood
+  };
+};
 
 const getMockKundli = (name: string) => ({
   personality: `${name}, you possess a strong will and a creative mind. This is a sample reading as the cosmic servers are busy.`,
@@ -40,7 +51,15 @@ const getMockCompatibility = () => ({
 // --- API Functions ---
 
 export const getDailyHoroscope = async (sign: string, language: Language, timeframe: HoroscopeTimeframe = HoroscopeTimeframe.TODAY) => {
-  const prompt = `Generate a ${timeframe.toLowerCase()} horoscope for ${sign} in ${language} language. Include 4-6 lines of prediction, lucky number, lucky color, and current mood. Ensure cultural relevance.`;
+  const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const prompt = `Generate a ${timeframe.toLowerCase()} horoscope for ${sign} for date: ${dateStr} in ${language} language. 
+  Ensure the response is unique for today.
+  Include:
+  1. A prediction (4-6 lines)
+  2. A lucky number (1-99)
+  3. A lucky color (specific, e.g., 'Deep Red')
+  4. Current mood (one word).
+  Ensure cultural relevance.`;
   
   try {
     const ai = getAi();
