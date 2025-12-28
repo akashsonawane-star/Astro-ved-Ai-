@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Language, HoroscopeTimeframe } from "../types";
 
-const MODEL = "gemini-2.5-flash";
+const MODEL = "gemini-3-flash-preview";
 
 const getAi = () => {
   return new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -10,17 +10,29 @@ const getAi = () => {
 // --- Mock Data Generators for Fallback ---
 
 const getMockHoroscope = (sign: string) => {
-  const colors = ["Gold", "Crimson", "Royal Blue", "Emerald", "Violet", "Silver", "Orange", "White", "Teal", "Lavender"];
-  const moods = ["Optimistic", "Reflective", "Energetic", "Calm", "Ambitious", "Creative", "Cautious", "Joyful"];
+  const colors = [
+    "Gold", "Crimson", "Royal Blue", "Emerald", "Violet", "Silver", "Orange", 
+    "Pearl White", "Teal", "Lavender", "Amber", "Ruby Red", "Deep Sea Blue", 
+    "Forest Green", "Sunset Orange", "Electric Purple", "Rose Pink"
+  ];
+  const moods = [
+    "Optimistic", "Reflective", "Energetic", "Calm", "Ambitious", "Creative", 
+    "Cautious", "Joyful", "Determined", "Peaceful", "Spiritual", "Productive"
+  ];
   
-  // Simple deterministic random based on date + sign length to vary it daily/per sign
-  const seed = new Date().getDate() + sign.length;
-  const randomColor = colors[seed % colors.length];
-  const randomMood = moods[seed % moods.length];
-  const randomNum = (seed % 9) + 1;
+  // Create a unique seed for this sign and today's date
+  // signSeed: Sum of char codes of sign name
+  const signSeed = sign.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const date = new Date();
+  const dateSeed = date.getDate() + (date.getMonth() * 31);
+  const finalSeed = signSeed + dateSeed;
+
+  const randomColor = colors[finalSeed % colors.length];
+  const randomMood = moods[finalSeed % moods.length];
+  const randomNum = (finalSeed % 98) + 1; // Range 1-99
 
   return {
-    prediction: `The cosmic alignment for ${sign} suggests a day of reflection and growth. While the stars are currently reorganizing their energy, focus on your inner strength. Good things are coming your way. (Offline Mode)`,
+    prediction: `The stars align for ${sign}. Today brings a unique opportunity for growth and connection. Focus on your long-term goals while staying grounded in the present moment. This cosmic window suggests a time of transformation. (Offline Mode)`,
     luckyNumber: randomNum.toString(),
     luckyColor: randomColor,
     mood: randomMood
@@ -52,14 +64,18 @@ const getMockCompatibility = () => ({
 
 export const getDailyHoroscope = async (sign: string, language: Language, timeframe: HoroscopeTimeframe = HoroscopeTimeframe.TODAY) => {
   const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  const prompt = `Generate a ${timeframe.toLowerCase()} horoscope for ${sign} for date: ${dateStr} in ${language} language. 
-  Ensure the response is unique for today.
+  
+  // Prompt is now much more demanding regarding uniqueness
+  const prompt = `Act as a master Vedic Astrologer. Generate a highly specific ${timeframe.toLowerCase()} horoscope for ${sign} for exactly ${dateStr} in ${language} language. 
+  CRITICAL: The lucky number, lucky color, and mood MUST be uniquely calculated based on the planetary transits for ${sign} on this specific day. Do not return generic values.
+  
   Include:
   1. A prediction (4-6 lines)
   2. A lucky number (1-99)
-  3. A lucky color (specific, e.g., 'Deep Red')
-  4. Current mood (one word).
-  Ensure cultural relevance.`;
+  3. A specific lucky color (e.g., 'Burnt Sienna', 'Emerald Green', 'Electric Blue')
+  4. Current mood (one descriptive word).
+  
+  Ensure the tone is professional, mystical, and culturally relevant to Vedic traditions.`;
   
   try {
     const ai = getAi();
@@ -91,12 +107,12 @@ export const getKundliInsight = async (
   details: { name: string; dob: string; tob: string; pob: string },
   language: Language
 ) => {
-  const prompt = `Generate a detailed Vedic Kundli report for Name: ${details.name}, DOB: ${details.dob}, TOB: ${details.tob}, Place: ${details.pob}. Language: ${language}. Provide: 1) Core Personality, 2) Career Path, 3) Relationship Outlook, 4) Health, 5) Planetary Influences.`;
+  const prompt = `Generate a detailed Vedic Kundli report for Name: ${details.name}, DOB: ${details.dob}, TOB: ${details.tob}, Place: ${details.pob}. Language: ${language}. Use model gemini-3-pro-preview for depth. Provide: 1) Core Personality, 2) Career Path, 3) Relationship Outlook, 4) Health, 5) Planetary Influences.`;
 
   try {
     const ai = getAi();
     const response = await ai.models.generateContent({
-      model: MODEL,
+      model: "gemini-3-pro-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",

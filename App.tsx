@@ -84,18 +84,18 @@ const pageTransition: Variants = {
 const getColorHex = (colorName: string): string => {
     if (!colorName) return '#F8D447';
     const c = colorName.toLowerCase();
-    if (c.includes('gold') || c.includes('yellow')) return '#F8D447';
-    if (c.includes('red') || c.includes('crimson') || c.includes('maroon') || c.includes('vermilion')) return '#EF4444';
-    if (c.includes('blue') || c.includes('azure') || c.includes('navy') || c.includes('teal')) return '#3B82F6';
-    if (c.includes('green') || c.includes('emerald') || c.includes('olive')) return '#10B981';
-    if (c.includes('purple') || c.includes('violet') || c.includes('indigo') || c.includes('lavender')) return '#A855F7';
-    if (c.includes('orange') || c.includes('amber')) return '#F97316';
-    if (c.includes('pink') || c.includes('magenta')) return '#EC4899';
-    if (c.includes('white') || c.includes('cream') || c.includes('pearl')) return '#FFFFFF';
-    if (c.includes('black') || c.includes('charcoal')) return '#1a1a1a';
-    if (c.includes('silver') || c.includes('grey') || c.includes('gray')) return '#C0C0C0';
-    if (c.includes('brown') || c.includes('beige')) return '#A52A2A';
-    return colorName; 
+    if (c.includes('gold') || c.includes('yellow') || c.includes('amber') || c.includes('saffron')) return '#F8D447';
+    if (c.includes('red') || c.includes('crimson') || c.includes('maroon') || c.includes('vermilion') || c.includes('ruby')) return '#EF4444';
+    if (c.includes('blue') || c.includes('azure') || c.includes('navy') || c.includes('teal') || c.includes('indigo') || c.includes('sapphire')) return '#3B82F6';
+    if (c.includes('green') || c.includes('emerald') || c.includes('olive') || c.includes('mint')) return '#10B981';
+    if (c.includes('purple') || c.includes('violet') || c.includes('indigo') || c.includes('lavender') || c.includes('magenta')) return '#A855F7';
+    if (c.includes('orange') || c.includes('coral') || c.includes('sunset')) return '#F97316';
+    if (c.includes('pink') || c.includes('rose') || c.includes('fuschia')) return '#EC4899';
+    if (c.includes('white') || c.includes('cream') || c.includes('pearl') || c.includes('ivory')) return '#F3F4F6';
+    if (c.includes('black') || c.includes('charcoal') || c.includes('ebony')) return '#1a1a1a';
+    if (c.includes('silver') || c.includes('grey') || c.includes('gray') || c.includes('slate')) return '#94A3B8';
+    if (c.includes('brown') || c.includes('beige') || c.includes('tan') || c.includes('sienna')) return '#78350F';
+    return '#F8D447'; // Default to gold
 };
 
 const detectRashiFromDate = (dateStr: string) => {
@@ -226,21 +226,49 @@ const AnimatedLogo = ({ size = "large" }: { size?: "small" | "large" }) => {
   );
 };
 
-// --- Ad Banner Component (AdSense Ready) ---
+// --- Ad Banner Component (AdSense/AdMob) ---
+const AD_CONFIG = {
+  client: "ca-app-pub-5400888645138874",
+  slot: "2186595460"
+};
+
 interface AdBannerProps {
   className?: string;
-  adSlot?: string; // Optional: For passing specific Ad Unit ID
+  adSlot?: string; 
 }
 
-const AdBanner = ({ className = "", adSlot }: AdBannerProps) => {
+const AdBanner = ({ className = "", adSlot = AD_CONFIG.slot }: AdBannerProps) => {
+  useEffect(() => {
+    try {
+      // @ts-ignore
+      if (window.adsbygoogle) {
+        // @ts-ignore
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      }
+    } catch (e) {
+      // console.error("Ad error:", e);
+    }
+  }, []);
+
   return (
-    <div className={`w-full min-h-[60px] mx-auto bg-black/20 backdrop-blur-md border border-white/5 flex flex-col items-center justify-center relative overflow-hidden rounded-lg my-4 group ${className}`}>
-      <div className="absolute inset-0 bg-gold-400/5 group-hover:bg-gold-400/10 transition-colors pointer-events-none" />
-      <span className="text-[9px] text-gray-600 uppercase tracking-widest relative z-10 font-bold border px-1 rounded border-gray-700">Ad</span>
-      <span className="text-[10px] text-gray-500 relative z-10 mt-1">Advertisement Space</span>
+    <div className={`w-full min-h-[90px] mx-auto bg-black/20 backdrop-blur-md border border-white/5 flex flex-col items-center justify-center relative overflow-hidden rounded-lg my-4 group ${className}`}>
       
-      {/* Simulate Ad Loading shimmer */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shine pointer-events-none" />
+      {/* Actual Ad Unit */}
+      <div className="absolute inset-0 z-20 text-center flex items-center justify-center">
+         <ins className="adsbygoogle"
+              style={{ display: 'block', width: '100%', height: '100%', minHeight: '90px' }}
+              data-ad-client={AD_CONFIG.client}
+              data-ad-slot={adSlot}
+              data-ad-format="auto"
+              data-full-width-responsive="true"></ins>
+      </div>
+
+      {/* Visual Placeholder (Visible if ad doesn't load/fill) */}
+      <div className="absolute inset-0 bg-gold-400/5 group-hover:bg-gold-400/10 transition-colors pointer-events-none -z-10" />
+      <div className="absolute inset-0 flex flex-col items-center justify-center -z-10">
+         <span className="text-[9px] text-gray-600 uppercase tracking-widest font-bold border px-1 rounded border-gray-700">Ad</span>
+         <span className="text-[10px] text-gray-500 mt-1">Advertisement Space</span>
+      </div>
     </div>
   );
 };
@@ -686,7 +714,7 @@ const HomeView: React.FC<{
                                   boxShadow: `0 0 10px ${getColorHex(signData.luckyColor)}80`
                               }} 
                            />
-                           <span className="text-white font-bold text-[10px] leading-tight" style={{color: getColorHex(signData.luckyColor)}}>{signData.luckyColor}</span>
+                           <span className="text-white font-bold text-[10px] leading-tight overflow-hidden text-ellipsis max-w-full" style={{color: getColorHex(signData.luckyColor)}}>{signData.luckyColor}</span>
                         </div>
                       </div>
                       <div className="bg-black/30 rounded-xl p-3 text-center border border-white/5">
@@ -830,7 +858,7 @@ const HoroscopeDetailView: React.FC<{
                                   boxShadow: `0 0 15px ${getColorHex(data.luckyColor)}60`
                               }} 
                            />
-                          <p className="text-gold-400 font-bold">{data.luckyColor}</p>
+                          <p className="text-gold-400 font-bold text-xs">{data.luckyColor}</p>
                       </div>
                       <div className="text-center flex flex-col items-center justify-center">
                           <span className="text-xs text-gray-500 uppercase mb-1">{t.luckyNumber}</span>
@@ -846,15 +874,9 @@ const HoroscopeDetailView: React.FC<{
   );
 }
 
-// ... Compatibility ... 
-interface InputCardProps {
-  title: string;
-  data: any;
-  onChange: (field: string, value: any) => void;
-  language: Language;
-}
-
-const CompatibilityInputCard: React.FC<InputCardProps> = ({ title, data, onChange, language }) => {
+// ... rest of the file remains same ...
+// Keeping standard compatibility with existing types/views
+const CompatibilityInputCard: React.FC<{ title: string; data: any; onChange: (field: string, value: any) => void; language: Language }> = ({ title, data, onChange, language }) => {
   const t = TRANSLATIONS[language];
   const genderOptions = [
     { value: 'Male', label: t.male },
@@ -910,6 +932,7 @@ const CompatibilityInputCard: React.FC<InputCardProps> = ({ title, data, onChang
   );
 };
 
+// ... Rest of component hierarchy (App, views etc) - No logic changes to routing required, only functional data fixes above ...
 const CompatibilityView: React.FC<{ language: Language, setView: (v: AppView) => void }> = ({ language, setView }) => {
     const t = TRANSLATIONS[language];
     const [p1, setP1] = useState<any>({});
@@ -976,7 +999,6 @@ const CompatibilityView: React.FC<{ language: Language, setView: (v: AppView) =>
     );
 };
 
-// ... FindRashi ...
 const FindRashiView: React.FC<{ language: Language, setView: (v: AppView) => void, onSignSelect: (sign: string) => void }> = ({ language, setView, onSignSelect }) => {
     const t = TRANSLATIONS[language];
     const [dob, setDob] = useState('');
@@ -1042,7 +1064,6 @@ const FindRashiView: React.FC<{ language: Language, setView: (v: AppView) => voi
     );
 }
 
-// ... Kundli ...
 const KundliView: React.FC<{ language: Language, setView: (v: AppView) => void }> = ({ language, setView }) => {
   const t = TRANSLATIONS[language];
   const [details, setDetails] = useState({ name: '', dob: '', tob: '', pob: '' });
@@ -1094,7 +1115,6 @@ const KundliView: React.FC<{ language: Language, setView: (v: AppView) => void }
   );
 };
 
-// ... Chat ...
 const ChatView: React.FC<{ language: Language, setView: (v: AppView) => void }> = ({ language, setView }) => {
   const t = TRANSLATIONS[language];
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -1336,8 +1356,6 @@ const NumerologyView: React.FC<{ onBack: () => void, language: Language }> = ({ 
         </motion.div>
     );
 }
-
-// --- Main App ---
 
 const App = () => {
   const [view, setView] = useState<AppView>(AppView.WELCOME);
